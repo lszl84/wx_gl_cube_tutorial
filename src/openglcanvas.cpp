@@ -63,12 +63,16 @@ bool OpenGLCanvas::InitializeOpenGL()
     constexpr auto vertexShaderSource = R"(
         #version 330 core
         layout (location = 0) in vec3 aPos;
+        layout (location = 1) in vec3 aColor;
 
         uniform mat4 modelMatrix;
+
+        out vec3 vertexColor;
 
         void main()
         {
             gl_Position = modelMatrix * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            vertexColor = aColor;
         }
     )";
 
@@ -76,9 +80,11 @@ bool OpenGLCanvas::InitializeOpenGL()
         #version 330 core
         out vec4 FragColor;
 
+        in vec3 vertexColor;
+
         void main()
         {
-            FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            FragColor = vec4(vertexColor, 1.0);
         }
     )";
 
@@ -132,8 +138,11 @@ bool OpenGLCanvas::InitializeOpenGL()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, s.xyzArray.size() * sizeof(float), s.xyzArray.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
