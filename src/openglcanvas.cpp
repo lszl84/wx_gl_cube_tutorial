@@ -1,7 +1,7 @@
 #include "openglcanvas.h"
 
-OpenGLCanvas::OpenGLCanvas(wxWindow *parent, const wxGLAttributes &canvasAttrs)
-    : wxGLCanvas(parent, canvasAttrs)
+OpenGLCanvas::OpenGLCanvas(wxWindow *parent, const wxGLAttributes &canvasAttrs, const Settings &settings)
+    : wxGLCanvas(parent, canvasAttrs), settings(settings)
 {
     wxGLContextAttrs ctxAttrs;
     ctxAttrs.PlatformDefaults().CoreProfile().OGLVersion(3, 3).EndList();
@@ -155,9 +155,24 @@ bool OpenGLCanvas::InitializeOpenGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    UpdateOpenGLSettings();
+
     isOpenGLInitialized = true;
 
     return true;
+}
+
+void OpenGLCanvas::UpdateOpenGLSettings()
+{
+    if (settings.zBufferEnabled)
+    {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(settings.zBufferOrder == Settings::ZBufferOrder::Less ? GL_LESS : GL_GREATER);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
 }
 
 void OpenGLCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
@@ -172,7 +187,12 @@ void OpenGLCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
     SetCurrent(*openGLContext);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+
+    GLint depthFuncValue;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthFuncValue);
+    glClearDepth(depthFuncValue == GL_LESS ? 1.0f : 0.0f);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shaderProgram);
 

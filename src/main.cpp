@@ -1,6 +1,8 @@
 #include <wx/wx.h>
 
 #include "cube.h"
+#include "settings.h"
+#include "settingspanel.h"
 #include "openglcanvas.h"
 
 class MyApp : public wxApp
@@ -17,6 +19,7 @@ public:
 
 private:
     OpenGLCanvas *openGLCanvas{nullptr};
+    SettingsPanel *settingsPanel{nullptr};
 };
 
 wxIMPLEMENT_APP(MyApp);
@@ -42,12 +45,24 @@ MyFrame::MyFrame(const wxString &title)
     {
         auto sizer = new wxBoxSizer(wxHORIZONTAL);
 
-        openGLCanvas = new OpenGLCanvas(this, vAttrs);
+        settingsPanel = new SettingsPanel(this);
+        settingsPanel->SetMinSize(FromDIP(wxSize(200, 600)));
+
+        openGLCanvas = new OpenGLCanvas(this, vAttrs, settingsPanel->GetSettings());
         openGLCanvas->SetMinSize(FromDIP(wxSize(600, 600)));
         openGLCanvas->SetFocus();
 
         sizer->Add(openGLCanvas, 1, wxEXPAND);
+        sizer->Add(settingsPanel, 0, wxEXPAND);
 
         SetSizerAndFit(sizer);
+
+        settingsPanel->Bind(SETTINGS_CHANGED_EVENT, [this](wxCommandEvent &event)
+                            {
+                                openGLCanvas->SetSettings(settingsPanel->GetSettings());
+                                openGLCanvas->Refresh(); });
+
+        openGLCanvas->Bind(wxEVT_ENTER_WINDOW, [this](wxMouseEvent &event)
+                           { openGLCanvas->SetFocus(); });
     }
 }
