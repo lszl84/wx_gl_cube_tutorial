@@ -56,12 +56,12 @@ struct Cube
         10, 11, 8, // second triangle
 
         // right
-        12, 13, 14, // first triangle
-        14, 15, 12, // second triangle
+        14, 13, 12, // 12, 13, 14, // first triangle
+        12, 15, 14, // 14, 15, 12, // second triangle
 
         // back
-        16, 17, 18, // first triangle
-        18, 19, 16, // second triangle
+        18, 17, 16, // 16, 17, 18, // first triangle
+        16, 19, 18, // 18, 19, 16, // second triangle
 
         // bottom
         20, 21, 22, // first triangle
