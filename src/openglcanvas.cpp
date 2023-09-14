@@ -173,6 +173,16 @@ void OpenGLCanvas::UpdateOpenGLSettings()
     {
         glDisable(GL_DEPTH_TEST);
     }
+
+    if (settings.faceCullingEnabled)
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(settings.faceCulling == Settings::FaceCulling::Front ? GL_FRONT : GL_BACK);
+    }
+    else
+    {
+        glDisable(GL_CULL_FACE);
+    }
 }
 
 void OpenGLCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))

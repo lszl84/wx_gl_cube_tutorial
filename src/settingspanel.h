@@ -24,6 +24,13 @@ public:
 
         greaterZBufferOrderRadioButton = new wxRadioButton(this, wxID_ANY, "Greater");
 
+        faceCullingCheckBox = new wxCheckBox(this, wxID_ANY, "Face culling");
+
+        frontFaceCullingRadioButton = new wxRadioButton(this, wxID_ANY, "Front",
+                                                        wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+
+        backFaceCullingRadioButton = new wxRadioButton(this, wxID_ANY, "Back");
+
         sizer->Add(zBufferCheckBox, 0, wxALL, FromDIP(5));
 
         auto zBufferGroupSizer = new wxBoxSizer(wxVERTICAL);
@@ -31,6 +38,14 @@ public:
         zBufferGroupSizer->Add(greaterZBufferOrderRadioButton, 0, wxLEFT | wxBOTTOM, FromDIP(5));
 
         sizer->Add(zBufferGroupSizer, 0, wxLEFT, FromDIP(5));
+
+        sizer->Add(faceCullingCheckBox, 0, wxALL, FromDIP(5));
+
+        auto faceCullingGroupSizer = new wxBoxSizer(wxVERTICAL);
+        faceCullingGroupSizer->Add(frontFaceCullingRadioButton, 0, wxLEFT | wxBOTTOM, FromDIP(5));
+        faceCullingGroupSizer->Add(backFaceCullingRadioButton, 0, wxLEFT | wxBOTTOM, FromDIP(5));
+
+        sizer->Add(faceCullingGroupSizer, 0, wxLEFT, FromDIP(5));
 
         SetSizer(sizer);
 
@@ -52,8 +67,9 @@ public:
 private:
     Settings settings;
 
-    wxCheckBox *zBufferCheckBox{nullptr};
+    wxCheckBox *zBufferCheckBox{nullptr}, *faceCullingCheckBox{nullptr};
     wxRadioButton *lessZBufferOrderRadioButton{nullptr}, *greaterZBufferOrderRadioButton{nullptr};
+    wxRadioButton *frontFaceCullingRadioButton{nullptr}, *backFaceCullingRadioButton{nullptr};
 
     void UpdateBoxes()
     {
@@ -64,6 +80,14 @@ private:
 
         lessZBufferOrderRadioButton->Enable(settings.zBufferEnabled);
         greaterZBufferOrderRadioButton->Enable(settings.zBufferEnabled);
+
+        faceCullingCheckBox->SetValue(settings.faceCullingEnabled);
+
+        frontFaceCullingRadioButton->SetValue(settings.faceCulling == Settings::FaceCulling::Front);
+        backFaceCullingRadioButton->SetValue(settings.faceCulling == Settings::FaceCulling::Back);
+
+        frontFaceCullingRadioButton->Enable(settings.faceCullingEnabled);
+        backFaceCullingRadioButton->Enable(settings.faceCullingEnabled);
     }
 
     void SetupCallbacks()
@@ -83,6 +107,24 @@ private:
         greaterZBufferOrderRadioButton->Bind(wxEVT_RADIOBUTTON, [this](wxCommandEvent &event)
                                              {
             settings.zBufferOrder = Settings::ZBufferOrder::Greater;
+            UpdateBoxes();
+            PostSettingsChangedEvent(); });
+
+        faceCullingCheckBox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &event)
+                                  {
+            settings.faceCullingEnabled = event.IsChecked();
+            UpdateBoxes();
+            PostSettingsChangedEvent(); });
+
+        frontFaceCullingRadioButton->Bind(wxEVT_RADIOBUTTON, [this](wxCommandEvent &event)
+                                          {
+            settings.faceCulling = Settings::FaceCulling::Front;
+            UpdateBoxes();
+            PostSettingsChangedEvent(); });
+
+        backFaceCullingRadioButton->Bind(wxEVT_RADIOBUTTON, [this](wxCommandEvent &event)
+                                         {
+            settings.faceCulling = Settings::FaceCulling::Back;
             UpdateBoxes();
             PostSettingsChangedEvent(); });
     }

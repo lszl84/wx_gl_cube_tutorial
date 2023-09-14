@@ -8,7 +8,14 @@ struct Settings
         Greater
     };
 
-    bool zBufferEnabled{true};
+    enum class FaceCulling
+    {
+        Front,
+        Back
+    };
+
+    bool zBufferEnabled{true}, faceCullingEnabled{true};
 
     ZBufferOrder zBufferOrder{ZBufferOrder::Less};
+    FaceCulling faceCulling{FaceCulling::Back};
 };
